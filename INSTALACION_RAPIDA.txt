@@ -1,0 +1,109 @@
+========================================
+GUÍA RÁPIDA DE INSTALACIÓN - MAC
+Gestor de Inversiones
+========================================
+
+📦 PASO 1: INSTALAR MYSQL
+--------------------------
+Terminal:
+  brew install mysql
+  brew services start mysql
+
+Crear base de datos:
+  mysql -u root -p < database.sql
+
+
+🐍 PASO 2: CONFIGURAR PYTHON
+--------------------------
+Terminal (dentro de la carpeta del proyecto):
+  python3 -m venv venv
+  source venv/bin/activate
+  pip install -r requirements.txt
+
+
+⚙️ PASO 3: CONFIGURAR CONEXIÓN
+--------------------------
+Editar app.py, buscar la función conectar_db() y cambiar:
+  - user: tu usuario de MySQL (por defecto 'root')
+  - password: tu contraseña de MySQL
+
+
+🚀 PASO 4: EJECUTAR
+--------------------------
+Terminal:
+  python3 app.py
+
+Navegador:
+  http://localhost:5000
+
+
+📝 NOTAS IMPORTANTES:
+--------------------------
+- Asegúrate de tener Python 3.8+ instalado
+- MySQL debe estar corriendo antes de iniciar la app
+- Si el puerto 5000 está ocupado, puedes cambiarlo en app.py (última línea)
+
+
+🔧 COMANDOS ÚTILES:
+--------------------------
+Activar entorno virtual:
+  source venv/bin/activate
+
+Desactivar entorno virtual:
+  deactivate
+
+Ver si MySQL está corriendo:
+  brew services list
+
+Detener la app:
+  Ctrl + C en la terminal
+
+
+🆘 PROBLEMAS COMUNES:
+--------------------------
+1. "Can't connect to MySQL"
+   → Verifica que MySQL esté corriendo: brew services start mysql
+
+2. "ModuleNotFoundError"
+   → Activa el entorno virtual: source venv/bin/activate
+   → Reinstala dependencias: pip install -r requirements.txt
+
+3. "Port 5000 already in use"
+   → Mata el proceso: lsof -ti:5000 | xargs kill -9
+   → O cambia el puerto en app.py
+
+
+✅ VERIFICACIÓN RÁPIDA:
+--------------------------
+1. ¿MySQL corriendo? → brew services list
+2. ¿Entorno virtual activado? → debe decir (venv) en el terminal
+3. ¿Dependencias instaladas? → pip list
+4. ¿Base de datos creada? → mysql -u root -p -e "SHOW DATABASES;"
+
+
+🎯 PRIMEROS PASOS EN LA APP:
+--------------------------
+1. Abre http://localhost:5000
+2. Click en "Nueva Inversión"
+3. Ingresa: Bitcoin, 0.5, 45000
+4. Actualiza el precio periódicamente
+5. Explora Historial, Análisis de Riesgo y Proyección
+
+
+🌟 ACTIVOS SOPORTADOS:
+--------------------------
+Criptomonedas: Bitcoin, Ethereum, Cardano, Solana, etc.
+Commodities: Oro, Plata, Platino, Paladio
+
+Puedes usar nombres o símbolos:
+  - Bitcoin, BTC
+  - Ethereum, ETH
+  - Oro, Gold, XAU
+  - Plata, Silver, XAG
+
+
+📧 SOPORTE:
+--------------------------
+Si tienes problemas, revisa el README.md completo para más detalles.
+
+¡Buena suerte con tus inversiones! 🚀

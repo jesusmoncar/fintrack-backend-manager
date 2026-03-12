@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Nueva Inversión - Gestor de Inversiones{% endblock %}
+
+{% block header %}
+<div class="header-section text-center">
+    <h1><i class="bi bi-plus-circle"></i> Nueva Inversión</h1>
+    <p class="lead">Registra una nueva inversión en tu portfolio</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-file-earmark-plus"></i> Datos de la Inversión</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('inversiones.nueva') }}">
+                    <!-- Nombre del activo -->
+                    <div class="mb-4">
+                        <label for="nombre" class="form-label fw-bold">
+                            <i class="bi bi-tag"></i> Nombre del Activo
+                        </label>
+                        <input type="text" class="form-control form-control-lg" id="nombre" 
+                               name="nombre" placeholder="Ej: Bitcoin, Oro, Plata, XPT" required>
+                        <div class="form-text">
+                            Nombre exacto del activo (Bitcoin, Ethereum, Oro, Plata, Platino, etc.)
+                        </div>
+                    </div>
+
+                    <!-- Cantidad -->
+                    <div class="mb-4">
+                        <label for="cantidad" class="form-label fw-bold">
+                            <i class="bi bi-box"></i> Cantidad
+                        </label>
+                        <input type="number" step="0.00000001" class="form-control form-control-lg" 
+                               id="cantidad" name="cantidad" placeholder="Ej: 0.5 BTC, 3.92 oz" required>
+                        <div class="form-text">
+                            Cantidad exacta de unidades compradas
+                        </div>
+                    </div>
+
+                    <!-- Precio de compra -->
+                    <div class="mb-4">
+                        <label for="precio_compra" class="form-label fw-bold">
+                            <i class="bi bi-currency-euro"></i> Precio de Compra (€)
+                        </label>
+                        <input type="number" step="0.01" class="form-control form-control-lg" 
+                               id="precio_compra" name="precio_compra" placeholder="Ej: 45000.00" required>
+                        <div class="form-text">
+                            Precio por unidad al momento de la compra
+                        </div>
+                    </div>
+
+                    <!-- Fecha de compra -->
+                    <div class="mb-4">
+                        <label for="fecha_compra" class="form-label fw-bold">
+                            <i class="bi bi-calendar"></i> Fecha de Compra
+                        </label>
+                        <input type="date" class="form-control form-control-lg" id="fecha_compra" 
+                               name="fecha_compra" max="{{ today }}" value="{{ today }}" required>
+                        <div class="form-text">
+                            <strong>Formato: YYYY-MM-DD</strong> (ejemplo: 2025-12-23 para 23 de diciembre)
+                        </div>
+                    </div>
+
+                    <!-- Vista previa del cálculo -->
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-calculator"></i> Vista Previa del Cálculo</h6>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <strong>Inversión Total:</strong><br>
+                                <span id="preview_total" class="fs-4 text-primary">€0.00</span>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Cantidad × Precio:</strong><br>
+                                <span id="preview_calculo" class="text-muted">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('main.index') }}" class="btn btn-secondary btn-lg">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle"></i> Guardar Inversión
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Ayuda -->
+        <div class="card mt-4 border-0 shadow-sm">
+            <div class="card-body">
+                <h6 class="text-primary"><i class="bi bi-lightbulb"></i> Consejos</h6>
+                <ul class="small mb-0">
+                    <li>Asegúrate de usar el <strong>nombre exacto</strong> del activo (Bitcoin, Oro, Plata, etc.)</li>
+                    <li>La <strong>cantidad</strong> debe ser el número de unidades (BTC, oz, gramos, etc.)</li>
+                    <li>El <strong>precio de compra</strong> es el precio por unidad en euros</li>
+                    <li>Puedes registrar inversiones de fechas pasadas</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Calculadora en tiempo real
+const cantidad = document.getElementById('cantidad');
+const precio = document.getElementById('precio_compra');
+const previewTotal = document.getElementById('preview_total');
+const previewCalculo = document.getElementById('preview_calculo');
+
+function calcularTotal() {
+    const cant = parseFloat(cantidad.value) || 0;
+    const prec = parseFloat(precio.value) || 0;
+    const total = cant * prec;
+    
+    previewTotal.textContent = '€' + total.toFixed(2);
+    previewCalculo.textContent = cant.toFixed(8) + ' × €' + prec.toFixed(2);
+}
+
+cantidad.addEventListener('input', calcularTotal);
+precio.addEventListener('input', calcularTotal);
+</script>
+{% endblock %}

@@ -1,0 +1,158 @@
+<!-- Modal para ajuste completo -->
+<div class="modal fade" id="modalAjuste{{ inv[0] }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">⚙️ Ajuste Completo - {{ inv[1] }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('ajustes.ajustar_individual', id=inv[0]) }}">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> 
+                        <strong>Ajusta todos los parámetros de esta inversión</strong><br>
+                        Ingresa los valores exactos que ves en Revolut.
+                    </div>
+
+                    <div class="row">
+                        <!-- Columna izquierda: Datos de compra -->
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">📋 Datos de Compra</h6>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Cantidad (Holdings)</label>
+                                <input type="number" step="0.00000001" name="cantidad" class="form-control" 
+                                       value="{{ '%.8f'|format(inv[2]) }}" required>
+                                <div class="form-text">
+                                    Cantidad exacta de Revolut (ej: 3.92312 oz)
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Precio de Compra (€)</label>
+                                <input type="number" step="0.01" name="precio_compra" class="form-control" 
+                                       value="{{ '%.2f'|format(inv[3]) }}" required>
+                                <div class="form-text">
+                                    Avg. Price de Revolut
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Inversión Total (€)</label>
+                                <input type="number" step="0.01" name="inversion_total" class="form-control" 
+                                       value="{{ '%.2f'|format(inv[5]) }}" required>
+                                <div class="form-text">
+                                    Lo que sacaste del bolsillo
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Inversión Neta (€)</label>
+                                <input type="number" step="0.01" name="inversion_neta" class="form-control" 
+                                       value="{{ '%.2f'|format(inv[6] if inv[6] else inv[5]) }}" required>
+                                <div class="form-text">
+                                    Después de comisiones de Revolut
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Columna derecha: Datos actuales -->
+                        <div class="col-md-6">
+                            <h6 class="text-success mb-3">📈 Datos Actuales</h6>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Precio Actual (€)</label>
+                                <input type="number" step="0.01" name="precio_actual" class="form-control" 
+                                       value="{{ '%.2f'|format(inv[8] if inv[8] else inv[3]) }}" required>
+                                <div class="form-text">
+                                    Current Price de Revolut
+                                </div>
+                            </div>
+
+                            <div class="alert alert-light border mt-4">
+                                <strong>💡 Fórmulas:</strong>
+                                <ul class="small mb-0 mt-2">
+                                    <li><strong>Valor Actual</strong> = Cantidad × Precio Actual</li>
+                                    <li><strong>Ganancia</strong> = Valor Actual - Inversión Total</li>
+                                    <li><strong>Porcentaje</strong> = (Ganancia / Inversión Total) × 100</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calculadora en tiempo real -->
+                    <div class="alert alert-warning">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Valor Actual:</strong><br>
+                                <span id="calc_valor{{ inv[0] }}" class="fs-5">€0.00</span>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Ganancia/Pérdida:</strong><br>
+                                <span id="calc_ganancia{{ inv[0] }}" class="fs-5">€0.00</span>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Porcentaje:</strong><br>
+                                <span id="calc_porcentaje{{ inv[0] }}" class="fs-5">0.00%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-warning btn-lg">
+                        <i class="bi bi-check-circle"></i> Aplicar Todos los Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Calculadora en tiempo real para ajuste{{ inv[0] }}
+(function() {
+    const modalId = 'modalAjuste{{ inv[0] }}';
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    
+    const form = modal.querySelector('form');
+    const inputs = {
+        cantidad: form.querySelector('[name="cantidad"]'),
+        precioActual: form.querySelector('[name="precio_actual"]'),
+        inversionTotal: form.querySelector('[name="inversion_total"]')
+    };
+    
+    const outputs = {
+        valor: document.getElementById('calc_valor{{ inv[0] }}'),
+        ganancia: document.getElementById('calc_ganancia{{ inv[0] }}'),
+        porcentaje: document.getElementById('calc_porcentaje{{ inv[0] }}')
+    };
+    
+    function calcular() {
+        const cantidad = parseFloat(inputs.cantidad.value) || 0;
+        const precioActual = parseFloat(inputs.precioActual.value) || 0;
+        const inversionTotal = parseFloat(inputs.inversionTotal.value) || 0;
+        
+        const valorActual = cantidad * precioActual;
+        const ganancia = valorActual - inversionTotal;
+        const porcentaje = inversionTotal > 0 ? (ganancia / inversionTotal) * 100 : 0;
+        
+        outputs.valor.textContent = '€' + valorActual.toFixed(2);
+        outputs.ganancia.textContent = (ganancia >= 0 ? '+€' : '€') + ganancia.toFixed(2);
+        outputs.ganancia.className = ganancia >= 0 ? 'fs-5 text-success fw-bold' : 'fs-5 text-danger fw-bold';
+        outputs.porcentaje.textContent = (porcentaje >= 0 ? '+' : '') + porcentaje.toFixed(2) + '%';
+        outputs.porcentaje.className = porcentaje >= 0 ? 'fs-5 text-success fw-bold' : 'fs-5 text-danger fw-bold';
+    }
+    
+    // Calcular al cambiar cualquier input
+    Object.values(inputs).forEach(input => {
+        if (input) input.addEventListener('input', calcular);
+    });
+    
+    // Calcular al abrir el modal
+    modal.addEventListener('shown.bs.modal', calcular);
+})();
+</script>

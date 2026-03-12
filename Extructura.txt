@@ -1,0 +1,66 @@
+gestor_inversiones/
+├── run.py                          # Punto de entrada
+├── config.py                       # Configuración
+├── requirements.txt                # Dependencias
+├── .env                           # Variables de entorno
+├── .gitignore                     # Git ignore
+│
+├── app/
+│   ├── __init__.py                # Factory app
+│   │
+│   ├── models/                    # Modelos de datos
+│   │   ├── __init__.py
+│   │   ├── inversion.py
+│   │   └── historial.py
+│   │
+│   ├── routes/                    # Rutas/Controladores (Blueprints)
+│   │   ├── __init__.py
+│   │   ├── main.py               # Dashboard principal
+│   │   ├── inversiones.py        # CRUD inversiones
+│   │   ├── historial.py          # Historial de precios
+│   │   ├── ajustes.py            # Ajustes manuales
+│   │   └── analisis.py           # Recomendaciones, riesgo
+│   │
+│   ├── services/                  # Lógica de negocio
+│   │   ├── __init__.py
+│   │   ├── precio_service.py     # APIs externas (CoinGecko, Yahoo)
+│   │   ├── calculo_service.py    # Cálculos financieros
+│   │   └── recomendacion_service.py
+│   │
+│   ├── utils/                     # Utilidades
+│   │   ├── __init__.py
+│   │   ├── database.py           # Conexión DB
+│   │   ├── validators.py         # Validaciones
+│   │   └── formatters.py         # Formato de números
+│   │
+│   ├── static/                    # Archivos estáticos
+│   │   ├── css/
+│   │   │   └── custom.css
+│   │   ├── js/
+│   │   │   └── app.js
+│   │   └── img/
+│   │
+│   └── templates/
+│       ├── base.html             # Template base
+│       ├── components/           # Componentes reutilizables
+│       │   ├── navbar.html
+│       │   ├── stat_card.html
+│       │   ├── modals/
+│       │   │   ├── actualizar.html
+│       │   │   ├── ajustar.html
+│       │   │   └── eliminar.html
+│       │   └── tables/
+│       │       └── inversiones_table.html
+│       └── pages/                # Páginas
+│           ├── index.html
+│           ├── nueva_inversion.html
+│           ├── historial.html
+│           ├── proyeccion.html
+│           ├── recomendaciones.html
+│           └── analisis_riesgo.html
+│
+└── tests/                         # Tests
+    ├── __init__.py
+    ├── test_models.py
+    ├── test_services.py
+    └── test_routes.py

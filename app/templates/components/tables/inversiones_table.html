@@ -1,0 +1,80 @@
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Activo</th>
+                <th>Inversión Total</th>
+                <th>Precio Compra</th>
+                <th>Fecha Compra</th>
+                <th>Precio Actual</th>
+                <th>Valor Actual</th>
+                <th>Ganancia/Pérdida</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inv in inversiones %}
+            <tr>
+                <td><strong>{{ inv[1] }}</strong></td>
+                <td>€{{ "%.2f"|format(inv[5]) }}</td>
+                <td>€{{ "%.2f"|format(inv[3]) }}</td>
+                <td>{{ inv[4] }}</td>
+                <td>
+                    {% if inv[8] %}
+                        €{{ "%.2f"|format(inv[8]) }}
+                    {% else %}
+                        <span class="badge bg-secondary">Sin datos</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if inv[9] %}
+                        €{{ "%.2f"|format(inv[9]) }}
+                    {% else %}
+                        <span class="badge bg-secondary">Sin datos</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if inv[10] is not none %}
+                        {% if inv[10] >= 0 %}
+                            <span class="ganancia-positiva">
+                                +€{{ "%.2f"|format(inv[10]) }}
+                                ({{ "%.2f"|format((inv[10]/inv[5])*100) }}%)
+                            </span>
+                        {% else %}
+                            <span class="ganancia-negativa">
+                                €{{ "%.2f"|format(inv[10]) }}
+                                ({{ "%.2f"|format((inv[10]/inv[5])*100) }}%)
+                            </span>
+                        {% endif %}
+                    {% else %}
+                        <span class="badge bg-secondary">Sin datos</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-primary btn-action" data-bs-toggle="modal" data-bs-target="#modal{{ inv[0] }}">
+                        <i class="bi bi-pencil-square"></i> Actualizar
+                    </button>
+                    <button class="btn btn-sm btn-warning btn-action" data-bs-toggle="modal" data-bs-target="#modalAjuste{{ inv[0] }}">
+                        <i class="bi bi-sliders"></i> Ajustar
+                    </button>
+                    <a href="{{ url_for('historial.ver_historial', id=inv[0]) }}" class="btn btn-sm btn-info btn-action">
+                        <i class="bi bi-clock-history"></i> Historial
+                    </a>
+                    <a href="{{ url_for('analisis.proyeccion', id=inv[0]) }}" class="btn btn-sm btn-success btn-action">
+                        <i class="bi bi-graph-up"></i> Proyección
+                    </a>
+                    <button class="btn btn-sm btn-danger btn-action" data-bs-toggle="modal" data-bs-target="#modalEliminar{{ inv[0] }}">
+                        <i class="bi bi-trash"></i> Eliminar
+                    </button>
+                </td>
+            </tr>
+
+            <!-- Modales por cada inversión -->
+            {% include 'components/modals/actualizar.html' %}
+            {% include 'components/modals/ajustar.html' %}
+            {% include 'components/modals/eliminar.html' %}
+
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

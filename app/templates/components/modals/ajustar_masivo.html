@@ -1,0 +1,142 @@
+<!-- Modal de ajuste masivo -->
+<div class="modal fade" id="modalAjusteMasivo" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">⚖️ Ajuste Masivo del Portfolio</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('ajustes.ajustar_masivo') }}">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> 
+                        <strong>Ajusta todas tus inversiones a la vez</strong><br>
+                        Ingresa los valores exactos que ves en Revolut para cada activo.
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Activo</th>
+                                    <th>Inversión</th>
+                                    <th>Ganancia Actual</th>
+                                    <th>% Actual</th>
+                                    <th>Tipo Ajuste</th>
+                                    <th>Valor de Revolut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for inv in inversiones %}
+                                <tr>
+                                    <td><strong>{{ inv[1] }}</strong></td>
+                                    <td>€{{ "%.2f"|format(inv[5]) }}</td>
+                                    <td>
+                                        {% if inv[10] is not none %}
+                                            {% if inv[10] >= 0 %}
+                                                <span class="text-success fw-bold">+€{{ "%.2f"|format(inv[10]) }}</span>
+                                            {% else %}
+                                                <span class="text-danger fw-bold">€{{ "%.2f"|format(inv[10]) }}</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted">€0.00</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if inv[10] is not none and inv[5] %}
+                                            {% set porcentaje = (inv[10]/inv[5])*100 %}
+                                            {% if porcentaje >= 0 %}
+                                                <span class="text-success fw-bold">+{{ "%.2f"|format(porcentaje) }}%</span>
+                                            {% else %}
+                                                <span class="text-danger fw-bold">{{ "%.2f"|format(porcentaje) }}%</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted">0.00%</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <input type="hidden" name="inversion_id[]" value="{{ inv[0] }}">
+                                        <select name="tipo_ajuste_{{ inv[0] }}" class="form-select form-select-sm tipo-ajuste-select" data-inv-id="{{ inv[0] }}">
+                                            <option value="">-- No ajustar --</option>
+                                            <option value="precio">💰 Ganancia (€)</option>
+                                            <option value="porcentaje">📊 Porcentaje (%)</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <!-- Campo ganancia -->
+                                        <input type="number" 
+                                               step="0.01" 
+                                               name="ganancia_{{ inv[0] }}" 
+                                               id="ganancia_{{ inv[0] }}"
+                                               class="form-control form-control-sm d-none" 
+                                               placeholder="Ej: 44.58"
+                                               value="{{ '%.2f'|format(inv[10] if inv[10] else 0) }}">
+                                        
+                                        <!-- Campo porcentaje -->
+                                        <input type="number" 
+                                               step="0.01" 
+                                               name="porcentaje_{{ inv[0] }}" 
+                                               id="porcentaje_{{ inv[0] }}"
+                                               class="form-control form-control-sm d-none" 
+                                               placeholder="Ej: 24.58"
+                                               value="{{ '%.2f'|format((inv[10]/inv[5])*100 if inv[10] and inv[5] else 0) }}">
+                                        
+                                        <small class="text-muted" id="hint_{{ inv[0] }}">Selecciona tipo</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <strong><i class="bi bi-lightbulb"></i> Consejos:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Deja en "-- No ajustar --" los activos que ya están correctos</li>
+                            <li>Usa <strong>💰 Ganancia (€)</strong> si Revolut muestra ganancia en euros</li>
+                            <li>Usa <strong>📊 Porcentaje (%)</strong> si Revolut muestra porcentaje</li>
+                            <li>Los valores se pre-rellenan con los actuales, solo modifica los que quieras ajustar</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-warning btn-lg">
+                        <i class="bi bi-check-circle"></i> Aplicar Todos los Ajustes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Mostrar/ocultar campos según tipo de ajuste
+document.querySelectorAll('.tipo-ajuste-select').forEach(select => {
+    select.addEventListener('change', function() {
+        const invId = this.dataset.invId;
+        const tipo = this.value;
+        const campoGanancia = document.getElementById(`ganancia_${invId}`);
+        const campoPorcentaje = document.getElementById(`porcentaje_${invId}`);
+        const hint = document.getElementById(`hint_${invId}`);
+        
+        if (tipo === 'precio') {
+            campoGanancia.classList.remove('d-none');
+            campoPorcentaje.classList.add('d-none');
+            hint.classList.add('d-none');
+            campoGanancia.focus();
+        } else if (tipo === 'porcentaje') {
+            campoGanancia.classList.add('d-none');
+            campoPorcentaje.classList.remove('d-none');
+            hint.classList.add('d-none');
+            campoPorcentaje.focus();
+        } else {
+            campoGanancia.classList.add('d-none');
+            campoPorcentaje.classList.add('d-none');
+            hint.classList.remove('d-none');
+        }
+    });
+});
+</script>

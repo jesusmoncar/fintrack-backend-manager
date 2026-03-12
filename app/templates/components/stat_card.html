@@ -1,0 +1,21 @@
+{# 
+    Componente: Tarjeta de Estadística
+    Uso: {% include 'components/stat_card.html' with icon='💰', label='Total', value=1000, type='invested' %}
+#}
+<div class="col-lg-3 col-md-6">
+    <div class="stat-card stat-card-{{ type }}">
+        <div class="text-center">
+            <span class="stat-icon">{{ icon }}</span>
+            <div class="stat-label">{{ label }}</div>
+            <div class="stat-value stat-value-{{ type }}">{{ value }}</div>
+            {% if subtitle %}
+            <div class="stat-subtitle">{{ subtitle }}</div>
+            {% endif %}
+            {% if percentage is defined %}
+            <span class="stat-percentage {% if percentage >= 0 %}percentage-positive{% else %}percentage-negative{% endif %}">
+                {% if percentage >= 0 %}+{% endif %}{{ "%.2f"|format(percentage) }}%
+            </span>
+            {% endif %}
+        </div>
+    </div>
+</div>

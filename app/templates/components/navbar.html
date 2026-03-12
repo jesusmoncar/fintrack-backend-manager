@@ -1,0 +1,34 @@
+<nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('main.index') }}">
+            <i class="bi bi-graph-up-arrow"></i> Gestor de Inversiones
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.index') }}">
+                        <i class="bi bi-house"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('inversiones.nueva') }}">
+                        <i class="bi bi-plus-circle"></i> Nueva Inversión
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('analisis.recomendaciones') }}">
+                        <i class="bi bi-lightbulb"></i> Recomendaciones
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('analisis.analisis_riesgo') }}">
+                        <i class="bi bi-shield-exclamation"></i> Análisis de Riesgo
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

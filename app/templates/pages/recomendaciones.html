@@ -1,0 +1,205 @@
+{# cspell:disable #}
+{# vscode css validation ignore #}
+{% extends 'base.html' %}
+
+{% block title %}Recomendaciones - Gestor de Inversiones{% endblock %}
+
+{% block header %}
+<div class="header-section text-center">
+    <h1><i class="bi bi-lightbulb"></i> Recomendaciones Personalizadas</h1>
+    <p class="lead">Análisis y sugerencias para tu portfolio</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Score del Portfolio -->
+<div class="row mb-4">
+    <div class="col-md-6 mx-auto">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="text-muted">Score del Portfolio</h5>
+                <div class="score-circle mx-auto mb-3 
+                    {% if score >= 80 %}score-excelente
+                    {% elif score >= 60 %}score-bueno
+                    {% elif score >= 40 %}score-regular
+                    {% else %}score-mejorable{% endif %}">
+                    <span class="fs-1 fw-bold text-white">{{ score }}/100</span>
+                </div>
+                <p class="mb-0">
+                    {% if score >= 80 %}
+                        <span class="badge bg-success fs-6">Excelente</span>
+                    {% elif score >= 60 %}
+                        <span class="badge bg-primary fs-6">Bueno</span>
+                    {% elif score >= 40 %}
+                        <span class="badge bg-warning fs-6">Regular</span>
+                    {% else %}
+                        <span class="badge bg-danger fs-6">Mejorable</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Distribución del Portfolio -->
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Distribución del Portfolio</h5>
+    </div>
+    <div class="card-body">
+        <div class="progress" style="height: 40px;">
+            <div class="progress-bar bg-info" style="width: {{ distribucion.criptomonedas }}%">
+                {% if distribucion.criptomonedas > 10 %}
+                    Crypto {{ "%.1f"|format(distribucion.criptomonedas) }}%
+                {% endif %}
+            </div>
+            <div class="progress-bar bg-warning" style="width: {{ distribucion.metales }}%">
+                {% if distribucion.metales > 10 %}
+                    Metales {{ "%.1f"|format(distribucion.metales) }}%
+                {% endif %}
+            </div>
+            <div class="progress-bar bg-secondary" style="width: {{ distribucion.otros }}%">
+                {% if distribucion.otros > 10 %}
+                    Otros {{ "%.1f"|format(distribucion.otros) }}%
+                {% endif %}
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-4 text-center">
+                <strong class="text-info">Criptomonedas:</strong> {{ "%.1f"|format(distribucion.criptomonedas) }}%
+            </div>
+            <div class="col-md-4 text-center">
+                <strong class="text-warning">Metales:</strong> {{ "%.1f"|format(distribucion.metales) }}%
+            </div>
+            <div class="col-md-4 text-center">
+                <strong class="text-secondary">Otros:</strong> {{ "%.1f"|format(distribucion.otros) }}%
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recomendaciones -->
+<h4 class="mb-3"><i class="bi bi-list-check"></i> Recomendaciones</h4>
+<div class="row">
+    {% for rec in recomendaciones %}
+    <div class="col-md-6 mb-3">
+        <div class="card h-100 border-start border-4 
+             {% if rec.tipo == 'advertencia' %}border-warning
+             {% elif rec.tipo == 'oportunidad' %}border-info
+             {% else %}border-success{% endif %}">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <span class="badge 
+                         {% if rec.prioridad == 'Alta' %}bg-danger
+                         {% elif rec.prioridad == 'Media' %}bg-warning
+                         {% else %}bg-success{% endif %}">
+                        {{ rec.prioridad }}
+                    </span>
+                    {{ rec.titulo }}
+                </h6>
+                <p class="card-text">{{ rec.descripcion }}</p>
+                <div class="alert alert-light mb-0">
+                    <strong>Acción:</strong> {{ rec.accion }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="section-divider"></div>
+
+<!-- Top Criptomonedas -->
+<h4 class="mb-3"><i class="bi bi-currency-bitcoin"></i> Top 10 Criptomonedas</h4>
+{% if top_criptos %}
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>24h</th>
+                <th>7d</th>
+                <th>Market Cap</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for crypto in top_criptos %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>
+                    <strong>{{ crypto.name }}</strong><br>
+                    <small class="text-muted">{{ crypto.symbol|upper }}</small>
+                </td>
+                <td>€{{ "%.2f"|format(crypto.current_price) }}</td>
+                <td class="{% if crypto.price_change_percentage_24h >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    {% if crypto.price_change_percentage_24h >= 0 %}+{% endif %}{{ "%.2f"|format(crypto.price_change_percentage_24h) }}%
+                </td>
+                <td class="{% if crypto.price_change_percentage_7d_in_currency >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    {% if crypto.price_change_percentage_7d_in_currency >= 0 %}+{% endif %}{{ "%.2f"|format(crypto.price_change_percentage_7d_in_currency) }}%
+                </td>
+                <td>€{{ "{:,.0f}".format(crypto.market_cap) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> No se pudieron cargar los datos de criptomonedas.
+</div>
+{% endif %}
+
+<div class="section-divider"></div>
+
+<!-- Top Metales -->
+<h4 class="mb-3"><i class="bi bi-gem"></i> Metales Preciosos</h4>
+{% if top_metales %}
+<div class="row">
+    {% for nombre, precio in top_metales.items() %}
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">{{ nombre }}</h6>
+                <h4 class="text-warning">€{{ "%.2f"|format(precio) }}</h4>
+                <small class="text-muted">por onza</small>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> No se pudieron cargar los datos de metales preciosos.
+</div>
+{% endif %}
+
+
+{% endblock %}
+
+
+{% block extra_styles %}
+<style>
+.score-circle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.score-excelente {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+.score-bueno {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+.score-regular {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+.score-mejorable {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+}
+</style>
+{% endblock %}

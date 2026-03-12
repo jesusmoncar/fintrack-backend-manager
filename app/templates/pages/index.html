@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Gestor de Inversiones{% endblock %}
+
+{% block content %}
+<!-- Resumen del Portfolio -->
+{% if inversiones %}
+<div class="row stats-row g-3">
+    <!-- Total Invertido -->
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card stat-card-invested">
+            <div class="text-center">
+                <span class="stat-icon">💰</span>
+                <div class="stat-label">Total Invertido</div>
+                <div class="stat-value stat-value-invested">€{{ "%.2f"|format(total_invertido) }}</div>
+                <div class="stat-subtitle">Capital inicial</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Valor Actual -->
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card stat-card-current">
+            <div class="text-center">
+                <span class="stat-icon">💎</span>
+                <div class="stat-label">Valor Actual</div>
+                <div class="stat-value stat-value-current">€{{ "%.2f"|format(valor_actual_total) }}</div>
+                <div class="stat-subtitle">Portfolio actual</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Ganancia/Pérdida -->
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card {% if ganancia_total >= 0 %}stat-card-profit{% else %}stat-card-loss{% endif %}">
+            <div class="text-center">
+                <span class="stat-icon">{{ portfolio_status.emoji }}</span>
+                <div class="stat-label">{{ portfolio_status.texto }}</div>
+                <div class="stat-value {% if ganancia_total >= 0 %}stat-value-profit{% else %}stat-value-loss{% endif %}">
+                    {% if ganancia_total >= 0 %}+{% endif %}€{{ "%.2f"|format(ganancia_total) }}
+                </div>
+                <span class="stat-percentage {% if porcentaje_total >= 0 %}percentage-positive{% else %}percentage-negative{% endif %}">
+                    {% if porcentaje_total >= 0 %}+{% endif %}{{ "%.2f"|format(porcentaje_total) }}%
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Activos -->
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card stat-card-assets">
+            <div class="text-center">
+                <span class="stat-icon">📊</span>
+                <div class="stat-label">Activos</div>
+                <div class="stat-value stat-value-assets">{{ num_inversiones }}</div>
+                <div class="stat-subtitle">{{ 'inversión activa' if num_inversiones == 1 else 'inversiones activas' }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section-divider"></div>
+{% endif %}
+
+<!-- Botones de acción -->
+<div class="text-center mb-4">
+    <a href="{{ url_for('inversiones.nueva') }}" class="btn btn-primary btn-lg">
+        <i class="bi bi-plus-circle"></i> Nueva Inversión
+    </a>
+    {% if inversiones %}
+    <form method="POST" action="{{ url_for('inversiones.actualizar_todos') }}" style="display:inline;" id="formActualizarTodos">
+        <button type="button" class="btn btn-success btn-lg" onclick="confirmarActualizacion()">
+            <i class="bi bi-arrow-repeat"></i> Actualizar Todos los Precios
+        </button>
+    </form>
+    <button type="button" class="btn btn-warning btn-lg" data-bs-toggle="modal" data-bs-target="#modalAjusteMasivo">
+        <i class="bi bi-sliders"></i> Ajustar Todo el Portfolio
+    </button>
+    {% endif %}
+</div>
+
+<h3 class="mb-4"><i class="bi bi-wallet2"></i> Mis Inversiones</h3>
+
+<!-- Tabla de inversiones -->
+{% if inversiones %}
+{% include 'components/tables/inversiones_table.html' %}
+{% else %}
+<div class="alert alert-info text-center">
+    <i class="bi bi-info-circle"></i> No tienes inversiones registradas aún. 
+    <a href="{{ url_for('inversiones.nueva') }}" class="alert-link">¡Crea tu primera inversión!</a>
+</div>
+{% endif %}
+
+<!-- Modal de confirmación para actualizar todos -->
+<div class="modal fade" id="modalActualizarTodos" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">🔄 Actualizar Todos los Precios</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> 
+                    <strong>Esta acción actualizará automáticamente los precios de todas tus inversiones</strong>
+                </div>
+                <p>Se obtendrán los precios actuales de:</p>
+                <ul>
+                    <li>📈 <strong>Criptomonedas:</strong> CoinGecko (tiempo real)</li>
+                    <li>💰 <strong>Commodities:</strong> Yahoo Finance (mercado oficial)</li>
+                </ul>
+                <p>La fecha del registro será: <strong>{{ today }}</strong></p>
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> 
+                    Si ya existe un registro de hoy, se actualizará con los nuevos precios.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-success" id="btnEjecutarActualizacion" onclick="ejecutarActualizacion()">
+                    <span id="spinnerActualizacion" class="spinner-border spinner-border-sm d-none"></span>
+                    <i class="bi bi-check-circle"></i> Actualizar Ahora
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de ajuste masivo -->
+{% include 'components/modals/ajustar_masivo.html' %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function confirmarActualizacion() {
+    const modal = new bootstrap.Modal(document.getElementById('modalActualizarTodos'));
+    modal.show();
+}
+
+function ejecutarActualizacion() {
+    const btn = document.getElementById('btnEjecutarActualizacion');
+    const spinner = document.getElementById('spinnerActualizacion');
+    
+    btn.disabled = true;
+    spinner.classList.remove('d-none');
+    
+    document.getElementById('formActualizarTodos').submit();
+}
+</script>
+{% endblock %}

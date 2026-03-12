@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gestor de Inversiones{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Estilos personalizados -->
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container-main {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+        .header-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        /* Estilos para tarjetas de estadísticas */
+        .stats-row {
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            height: 100%;
+        }
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        .stat-card-invested {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-color: #667eea;
+        }
+        .stat-card-current {
+            background: linear-gradient(135deg, #4facfe15 0%, #00f2fe15 100%);
+            border-color: #4facfe;
+        }
+        .stat-card-profit {
+            background: linear-gradient(135deg, #43e97b15 0%, #38f9d715 100%);
+            border-color: #43e97b;
+        }
+        .stat-card-loss {
+            background: linear-gradient(135deg, #fa709a15 0%, #fee14015 100%);
+            border-color: #fa709a;
+        }
+        .stat-card-assets {
+            background: linear-gradient(135deg, #f093fb15 0%, #f5576c15 100%);
+            border-color: #f093fb;
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6c757d;
+            margin-bottom: 8px;
+        }
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+            line-height: 1.2;
+        }
+        .stat-value-invested { color: #667eea; }
+        .stat-value-current { color: #4facfe; }
+        .stat-value-profit { color: #43e97b; }
+        .stat-value-loss { color: #fa709a; }
+        .stat-value-assets { color: #f093fb; }
+        
+        .stat-subtitle {
+            font-size: 0.85rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+        .stat-percentage {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+        .percentage-positive {
+            background: #43e97b20;
+            color: #2bb55c;
+        }
+        .percentage-negative {
+            background: #fa709a20;
+            color: #e8506a;
+        }
+        
+        /* Estilos para tablas */
+        .ganancia-positiva {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .ganancia-negativa {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .btn-action {
+            margin: 2px;
+        }
+        
+        /* Separador decorativo */
+        .section-divider {
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #667eea, #764ba2, transparent);
+            margin: 30px 0;
+            border-radius: 10px;
+        }
+        
+        /* Animaciones */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        .stat-card-profit:hover, .stat-card-loss:hover {
+            animation: pulse 2s infinite;
+        }
+    </style>
+    
+    {% block extra_styles %}{% endblock %}
+
+</head>
+<body>
+    <!-- Navbar -->
+    {% include 'components/navbar.html' %}
+    
+    <!-- Contenido principal -->
+    <div class="container container-main">
+        <!-- Header -->
+        {% block header %}
+        <div class="header-section text-center">
+            <h1><i class="bi bi-graph-up-arrow"></i> Gestor de Inversiones</h1>
+            <p class="lead">Administra tu portafolio de criptomonedas y commodities</p>
+        </div>
+        {% endblock %}
+        
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Contenido de la página -->
+        {% block content %}{% endblock %}
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Scripts personalizados -->
+    {% block scripts %}{% endblock %}
+</body>
+</html>

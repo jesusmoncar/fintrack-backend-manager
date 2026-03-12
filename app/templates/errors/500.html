@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Error del servidor - 500{% endblock %}
+
+{% block header %}
+<div class="header-section text-center">
+    <h1 style="font-size: 5rem;">⚠️</h1>
+    <h1>Error del servidor</h1>
+    <p class="lead">Error 500</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+        <div class="card shadow-lg border-danger">
+            <div class="card-body p-5">
+                <h2 class="mb-4 text-danger">¡Algo salió mal!</h2>
+                <p class="lead text-muted mb-4">
+                    Ocurrió un error inesperado en el servidor. Nuestro equipo ha sido notificado y estamos trabajando para solucionarlo.
+                </p>
+                
+                <div class="alert alert-warning">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Sugerencia:</strong> Intenta recargar la página en unos momentos.
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                    <button onclick="location.reload()" class="btn btn-warning btn-lg">
+                        <i class="bi bi-arrow-clockwise"></i> Recargar Página
+                    </button>
+                    <a href="{{ url_for('main.index') }}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-house"></i> Volver al Dashboard
+                    </a>
+                </div>
+
+                <div class="mt-5">
+                    <h5 class="text-muted">Información técnica</h5>
+                    <p class="small text-muted">
+                        Si el problema persiste, contacta al administrador del sistema.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

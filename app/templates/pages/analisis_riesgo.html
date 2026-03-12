@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Análisis de Riesgo - Gestor de Inversiones{% endblock %}
+
+{% block header %}
+<div class="header-section text-center">
+    <h1><i class="bi bi-shield-exclamation"></i> Análisis de Riesgo</h1>
+    <p class="lead">Evaluación del riesgo de tu portfolio</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Nivel de Riesgo -->
+<div class="row mb-4">
+    <div class="col-md-6 mx-auto">
+        <div class="card text-center border-{{ nivel_riesgo.color }}">
+            <div class="card-body">
+                <h5 class="text-muted">Nivel de Riesgo del Portfolio</h5>
+                <div class="my-4">
+                    <span style="font-size: 5rem;">{{ nivel_riesgo.emoji }}</span>
+                </div>
+                <h2 class="text-{{ nivel_riesgo.color }}">{{ nivel_riesgo.nivel }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Métricas de Riesgo -->
+<h4 class="mb-3"><i class="bi bi-bar-chart"></i> Métricas de Riesgo</h4>
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Volatilidad Promedio</h6>
+                <h3 class="text-primary">{{ "%.2f"|format(metricas.volatilidad_promedio) }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Max Drawdown</h6>
+                <h3 class="text-danger">{{ "%.2f"|format(metricas.max_drawdown) }}%</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Concentración</h6>
+                <h3 class="text-warning">{{ "%.2f"|format(metricas.concentracion) }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">ROI Promedio</h6>
+                <h3 class="{% if metricas.roi_promedio >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    {% if metricas.roi_promedio >= 0 %}+{% endif %}{{ "%.2f"|format(metricas.roi_promedio) }}%
+                </h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recomendaciones de Riesgo -->
+<h4 class="mb-3"><i class="bi bi-exclamation-triangle"></i> Recomendaciones</h4>
+{% if recomendaciones %}
+<div class="row">
+    {% for rec in recomendaciones %}
+    <div class="col-md-6 mb-3">
+        <div class="alert alert-{{ rec.tipo }}">
+            <h6><strong>{{ rec.titulo }}</strong></h6>
+            <p class="mb-0">{{ rec.descripcion }}</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-success">
+    <i class="bi bi-check-circle"></i> Tu portfolio tiene un nivel de riesgo controlado. ¡Buen trabajo!
+</div>
+{% endif %}
+
+<!-- Información adicional -->
+<div class="card mt-4">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="bi bi-info-circle"></i> ¿Qué Significan Estas Métricas?</h5>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Volatilidad</dt>
+            <dd class="col-sm-9">Mide cuánto fluctúan los precios. Mayor volatilidad = mayor riesgo.</dd>
+            
+            <dt class="col-sm-3">Max Drawdown</dt>
+            <dd class="col-sm-9">La mayor caída desde un máximo. Indica la peor pérdida potencial.</dd>
+            
+            <dt class="col-sm-3">Concentración</dt>
+            <dd class="col-sm-9">Qué tan concentrado está tu portfolio. Mayor concentración = mayor riesgo.</dd>
+            
+            <dt class="col-sm-3">ROI Promedio</dt>
+            <dd class="col-sm-9">Retorno de inversión promedio de tus activos.</dd>
+        </dl>
+    </div>
+</div>
+{% endblock %}

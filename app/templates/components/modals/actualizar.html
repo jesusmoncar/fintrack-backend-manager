@@ -1,0 +1,36 @@
+<!-- Modal para actualizar precio -->
+<div class="modal fade" id="modal{{ inv[0] }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Actualizar Precio - {{ inv[1] }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('inversiones.actualizar_precio', id=inv[0]) }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Precio Actual (€)</label>
+                        <input type="number" step="0.00000001" name="precio_actual" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fecha del Registro</label>
+                        <input type="date" name="fecha_registro" class="form-control" value="{{ today }}" required>
+                    </div>
+                    <div class="alert alert-info">
+                        <strong>Inversión Total:</strong> €{{ "%.2f"|format(inv[5]) }}<br>
+                        <strong>Inversión Neta:</strong> €{{ "%.2f"|format(inv[6]) if inv[6] else "%.2f"|format(inv[5]) }}<br>
+                        {% if inv[6] and (inv[5] - inv[6]) > 0 %}
+                        <strong>Comisión:</strong> €{{ "%.2f"|format(inv[5] - inv[6]) }}<br>
+                        {% endif %}
+                        <strong>Precio de Compra:</strong> €{{ "%.2f"|format(inv[3]) }}<br>
+                        <strong>Cantidad:</strong> {{ "%.6f"|format(inv[2]) }} unidades
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

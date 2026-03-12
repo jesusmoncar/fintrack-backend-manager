@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+
+{% block title %}Historial - {{ inversion[1] }} - Gestor de Inversiones{% endblock %}
+
+{% block header %}
+<div class="header-section">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1><i class="bi bi-clock-history"></i> Historial de Precios</h1>
+            <p class="lead mb-0">{{ inversion[1] }}</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{{ url_for('main.index') }}" class="btn btn-light">
+                <i class="bi bi-arrow-left"></i> Volver al Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Información de la inversión -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Cantidad</h6>
+                <h4 class="text-primary">{{ "%.6f"|format(inversion[2]) }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Precio Compra</h6>
+                <h4 class="text-primary">€{{ "%.2f"|format(inversion[3]) }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Fecha Compra</h6>
+                <h4 class="text-primary">{{ inversion[4] }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Inversión Total</h6>
+                <h4 class="text-primary">€{{ "%.2f"|format(inversion[5]) }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráfico -->
+{% if datos_grafico %}
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="bi bi-graph-up"></i> Evolución del Precio</h5>
+    </div>
+    <div class="card-body">
+        <canvas id="chartHistorial" height="80"></canvas>
+    </div>
+</div>
+{% endif %}
+
+<!-- Historial por semanas -->
+<div class="card">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0"><i class="bi bi-calendar-week"></i> Historial Detallado</h5>
+    </div>
+    <div class="card-body">
+        {% if historial_por_semanas %}
+            {% for semana_key, semana_data in historial_por_semanas.items() %}
+            <div class="semana-header mb-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 10px;">
+                <h6 class="mb-1">
+                    <i class="bi bi-calendar3"></i> {{ semana_key }}
+                    <span class="badge bg-light text-dark ms-2">{{ semana_data.registros|length }} registros</span>
+                </h6>
+            </div>
+
+            <div class="table-responsive mb-4">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Día</th>
+                            <th>Precio</th>
+                            <th>Valor Total</th>
+                            <th>Ganancia/Pérdida</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for registro in semana_data.registros %}
+                        <tr class="{% if registro[2].weekday() >= 5 %}dia-fin-semana{% else %}dia-laborable{% endif %}">
+                            <td>{{ registro[2].strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                {% set dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] %}
+                                <span class="badge {% if registro[2].weekday() >= 5 %}bg-warning{% else %}bg-primary{% endif %}">
+                                    {{ dias[registro[2].weekday()] }}
+                                </span>
+                            </td>
+                            <td>€{{ "%.2f"|format(registro[3]) }}</td>
+                            <td>€{{ "%.2f"|format(registro[4]) }}</td>
+                            <td>
+                                {% if registro[5] >= 0 %}
+                                    <span class="ganancia-positiva">+€{{ "%.2f"|format(registro[5]) }}</span>
+                                {% else %}
+                                    <span class="ganancia-negativa">€{{ "%.2f"|format(registro[5]) }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form method="POST" action="{{ url_for('historial.eliminar_registro', registro_id=registro[0]) }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger" 
+                                            onclick="return confirm('¿Eliminar este registro?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+
+            <!-- Paginación -->
+            {% if total_paginas > 1 %}
+            <nav>
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {% if page == 1 %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('historial.ver_historial', id=inversion[0], page=page-1) }}">
+                            Anterior
+                        </a>
+                    </li>
+                    
+                    {% for p in range(1, total_paginas + 1) %}
+                        {% if p == page %}
+                        <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+                        {% elif p == 1 or p == total_paginas or (p >= page - 2 and p <= page + 2) %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('historial.ver_historial', id=inversion[0], page=p) }}">
+                                {{ p }}
+                            </a>
+                        </li>
+                        {% elif p == page - 3 or p == page + 3 %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <li class="page-item {% if page == total_paginas %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('historial.ver_historial', id=inversion[0], page=page+1) }}">
+                            Siguiente
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="alert alert-info text-center">
+                Página {{ page }} de {{ total_paginas }} ({{ total_registros }} registros totales)
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle"></i> No hay historial disponible para esta inversión.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if datos_grafico %}
+<!-- Datos del gráfico en JSON -->
+<script id="chart-data" type="application/json">
+{
+    "labels": [
+        {% for dato in datos_grafico|reverse %}
+        "{{ dato[0].strftime('%Y-%m-%d') }}"{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ],
+    "precios": [
+        {% for dato in datos_grafico|reverse %}
+        {{ dato[1] }}{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Cargar datos del JSON
+const chartDataElement = document.getElementById('chart-data');
+const chartData = JSON.parse(chartDataElement.textContent);
+
+// Crear gráfico
+const ctx = document.getElementById('chartHistorial').getContext('2d');
+const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: chartData.labels,
+        datasets: [{
+            label: 'Precio Actual (€)',
+            data: chartData.precios,
+            borderColor: '#667eea',
+            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top'
+            },
+            tooltip: {
+                mode: 'index',
+                intersect: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: false,
+                ticks: {
+                    callback: function(value) {
+                        return '€' + value.toFixed(2);
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+{% endif %}
+{% endblock %}
+
+{% block extra_styles %}
+<style>
+.dia-laborable {
+    background-color: #f8f9fa;
+}
+.dia-fin-semana {
+    background-color: #fff3cd;
+}
+</style>
+{% endblock %}

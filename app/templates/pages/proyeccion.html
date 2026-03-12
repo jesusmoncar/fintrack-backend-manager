@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Proyección - {{ inversion[1] }} - Gestor de Inversiones{% endblock %}
+
+{% block header %}
+<div class="header-section">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1><i class="bi bi-graph-up"></i> Proyección de Inversión</h1>
+            <p class="lead mb-0">{{ inversion[1] }}</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{{ url_for('main.index') }}" class="btn btn-light">
+                <i class="bi bi-arrow-left"></i> Volver al Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+{% if proyecciones.tiene_datos %}
+<!-- Información actual -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-center border-primary">
+            <div class="card-body">
+                <h6 class="text-muted">Valor Actual</h6>
+                <h3 class="text-primary">€{{ "%.2f"|format(proyecciones.valor_actual) }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center border-success">
+            <div class="card-body">
+                <h6 class="text-muted">Tasa de Crecimiento Anual</h6>
+                <h3 class="{% if proyecciones.tasa_crecimiento >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    {% if proyecciones.tasa_crecimiento >= 0 %}+{% endif %}{{ "%.2f"|format(proyecciones.tasa_crecimiento * 100) }}%
+                </h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center border-warning">
+            <div class="card-body">
+                <h6 class="text-muted">Volatilidad</h6>
+                <h3 class="text-warning">{{ "%.2f"|format(proyecciones.volatilidad) }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Proyecciones por escenario -->
+<div class="row">
+    <!-- Escenario Conservador -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">📉 Escenario Conservador</h5>
+                <small>Crecimiento: {{ "%.2f"|format(proyecciones.tasa_crecimiento * 0.5 * 100) }}%</small>
+            </div>
+            <div class="card-body">
+                {% for proyeccion in proyecciones.proyecciones.conservador %}
+                <div class="mb-3">
+                    <strong>{{ proyeccion.periodo }}</strong><br>
+                    <span class="fs-5">€{{ "%.2f"|format(proyeccion.valor) }}</span><br>
+                    <small class="{% if proyeccion.ganancia >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {% if proyeccion.ganancia >= 0 %}+{% endif %}€{{ "%.2f"|format(proyeccion.ganancia) }}
+                    </small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Escenario Moderado -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">📊 Escenario Moderado</h5>
+                <small>Crecimiento: {{ "%.2f"|format(proyecciones.tasa_crecimiento * 100) }}%</small>
+            </div>
+            <div class="card-body">
+                {% for proyeccion in proyecciones.proyecciones.moderado %}
+                <div class="mb-3">
+                    <strong>{{ proyeccion.periodo }}</strong><br>
+                    <span class="fs-5">€{{ "%.2f"|format(proyeccion.valor) }}</span><br>
+                    <small class="{% if proyeccion.ganancia >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {% if proyeccion.ganancia >= 0 %}+{% endif %}€{{ "%.2f"|format(proyeccion.ganancia) }}
+                    </small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Escenario Optimista -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">📈 Escenario Optimista</h5>
+                <small>Crecimiento: {{ "%.2f"|format(proyecciones.tasa_crecimiento * 1.5 * 100) }}%</small>
+            </div>
+            <div class="card-body">
+                {% for proyeccion in proyecciones.proyecciones.optimista %}
+                <div class="mb-3">
+                    <strong>{{ proyeccion.periodo }}</strong><br>
+                    <span class="fs-5">€{{ "%.2f"|format(proyeccion.valor) }}</span><br>
+                    <small class="{% if proyeccion.ganancia >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {% if proyeccion.ganancia >= 0 %}+{% endif %}€{{ "%.2f"|format(proyeccion.ganancia) }}
+                    </small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Advertencias -->
+<div class="alert alert-warning">
+    <h6><i class="bi bi-exclamation-triangle"></i> Importante</h6>
+    <ul class="mb-0">
+        <li>Estas proyecciones se basan en el rendimiento histórico y <strong>no garantizan resultados futuros</strong></li>
+        <li>La volatilidad de {{ "%.2f"|format(proyecciones.volatilidad) }} indica el riesgo asociado</li>
+        <li>Considera múltiples factores antes de tomar decisiones de inversión</li>
+    </ul>
+</div>
+
+{% else %}
+<!-- Sin datos -->
+<div class="alert alert-warning text-center">
+    <i class="bi bi-exclamation-triangle"></i> {{ proyecciones.mensaje }}
+</div>
+{% endif %}
+{% endblock %}
